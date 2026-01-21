@@ -1,5 +1,7 @@
 # @block52/deck
 
+[![CI](https://github.com/block52/typescript-deck/actions/workflows/ci.yml/badge.svg)](https://github.com/block52/typescript-deck/actions/workflows/ci.yml)
+
 A TypeScript implementation of a standard 52-card deck with cryptographic shuffling. Perfect for poker applications, card games, and any project requiring verifiable randomness.
 
 ## Features
