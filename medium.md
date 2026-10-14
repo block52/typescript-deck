@@ -25,7 +25,7 @@ No existing library provides cryptographic hashing for shuffle verification. Our
 
 ## Zero Dependencies
 
-While deckjs pulls in lodash for a 20-line algorithm, @block52/deck uses only Node's built-in `crypto` module—no supply chain risk, fully auditable.
+While deckjs pulls in lodash for a 20-line algorithm, @block52/deck has no dependencies at all. It draws randomness from Web Crypto `getRandomValues` (built into Node 20+, browsers and edge runtimes) and ships its own SHA-256, so there's no supply-chain risk, it's fully auditable, and it runs anywhere.
 
 ## Install
 

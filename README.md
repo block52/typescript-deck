@@ -2,16 +2,16 @@
 
 [![CI](https://github.com/block52/typescript-deck/actions/workflows/ci.yml/badge.svg)](https://github.com/block52/typescript-deck/actions/workflows/ci.yml)
 
-A TypeScript implementation of a standard 52-card deck with cryptographic shuffling. Perfect for poker applications, card games, and any project requiring verifiable randomness.
+A TypeScript 52-card deck with a cryptographically secure, unbiased, verifiable shuffle, for poker servers, card games and anything that needs a fair deal it can prove.
 
 ## Features
 
-- **Standard 52-card deck** - All suits and ranks properly implemented
-- **Fisher-Yates shuffle** - Cryptographically sound shuffling algorithm
-- **Deterministic seeding** - Reproduce exact shuffle results with seed arrays
-- **SHA256 hashing** - Verify deck state and shuffle integrity
-- **Serialization** - Save and restore deck state from string representation
-- **Zero dependencies** - Only uses Node.js built-in `crypto` module
+- **Secure shuffle.** Unseeded shuffles draw from Web Crypto `getRandomValues`, and never `Math.random`. If it isn't available, the shuffle throws rather than fall back.
+- **Unbiased.** Fisher-Yates with each swap index drawn uniformly by rejection sampling, so there's no modulo bias. A chi-square test in the suite checks every card is equally likely in every position.
+- **Verifiable.** `seedHash` commits to the shuffle seed and `hash` to the deck order (SHA-256). Publish the commitment before a hand and reveal the seed after, and anyone can replay the shuffle.
+- **Deterministic seeding.** The same seed always gives the same order.
+- **Interoperable notation.** `toMnemonics({ tens: "T", suitCase: "lower" })` writes the order as `As`, `Td`, … for other engines, and `fromString` reads `10H`, `TH` or `Th`.
+- **Portable, no dependencies.** It ships its own SHA-256 and imports nothing from Node, so it runs the same in Node 20+, browsers and edge runtimes.
 
 ## Installation
 
@@ -60,16 +60,18 @@ const restored = new Deck("[AC]-2C-3C-...-KS");
 
 #### `shuffle(seed?: number[])`
 
-Shuffles the deck using the Fisher-Yates algorithm.
+Shuffles the deck with Fisher-Yates and resets the deal position to the top.
 
 ```typescript
-// Random shuffle
+// Secure random shuffle
 deck.shuffle();
 
-// Deterministic shuffle (seed must be 52 numbers)
+// Deterministic shuffle: 52 non-negative integers; position i swaps with seed[i] % (i + 1)
 const seed = Array.from({ length: 52 }, (_, i) => i * 100);
 deck.shuffle(seed);
 ```
+
+For a fair seeded shuffle, `seed[i]` should be uniform in `[0, i]`, which is what an unseeded shuffle generates. Large arbitrary numbers reduced `% (i + 1)` slightly favour low values.
 
 #### `getNext(): Card`
 
@@ -82,10 +84,19 @@ const card = deck.getNext();
 
 #### `deal(amount: number): Card[]`
 
-Deals multiple cards from the deck.
+Deals the next `amount` cards. It throws if fewer are left.
 
 ```typescript
 const hand = deck.deal(5);
+```
+
+#### `toMnemonics(format?): string[]`
+
+The deck order, top first, in a chosen notation. Use it to hand a shuffled deck to another engine.
+
+```typescript
+deck.toMnemonics();                                  // ["AC", "2C", …, "10C", …]
+deck.toMnemonics({ tens: "T", suitCase: "lower" });  // ["Ac", "2c", …, "Tc", …]
 ```
 
 #### `toString(): string`
@@ -138,7 +149,7 @@ Cards are represented as rank + suit:
 | Rank | Symbol |
 |------|--------|
 | Ace | A |
-| 2-10 | 2-10 |
+| 2-10 | 2-10 (`T` is also accepted for ten) |
 | Jack | J |
 | Queen | Q |
 | King | K |
@@ -150,7 +161,7 @@ Cards are represented as rank + suit:
 | Hearts | H |
 | Spades | S |
 
-Examples: `AS` (Ace of Spades), `10H` (Ten of Hearts), `KC` (King of Clubs)
+Examples: `AS` (Ace of Spades), `10H` (Ten of Hearts), `KC` (King of Clubs). `fromString` also reads `TH` and lower-case suits (`Th`), normalising the mnemonic to `10H`.
 
 ## String Serialization Format
 
@@ -163,7 +174,7 @@ The `toString()` method serializes the deck to a string that can be stored and r
 ```
 
 - **52 card mnemonics** separated by hyphens (`-`)
-- Cards are listed in order from bottom to top of the deck
+- Cards are listed in deal order: the first card is dealt first
 - The **current position** (next card to be drawn) is marked with square brackets
 
 ### Position Marker

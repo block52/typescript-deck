@@ -6,6 +6,6 @@ We assumed npm would have us covered. It didn't. Every existing TypeScript deck 
 
 The other gaps compounded it. Some libraries hadn't been touched since TypeScript 3.8. Some pulled in lodash for twenty lines of swap logic. None exposed a verifiable hash of the deck or seed, so there was no path to a commit-reveal scheme: hash the seed, publish the hash before the hand, reveal the seed after, let any player recompute the shuffle.
 
-So we wrote `@block52/deck`. TypeScript 5.3, zero runtime dependencies, Node's `crypto.randomInt` driving Fisher-Yates, SHA256 on both deck state and seed array. Deterministic when seeded, auditable after the fact, reproducible from a serialized string.
+So we wrote `@block52/deck`. TypeScript 5.3, zero runtime dependencies, Web Crypto `getRandomValues` with rejection sampling driving Fisher-Yates (no modulo bias, and no `Math.random` fallback), SHA256 on both deck state and seed array. Deterministic when seeded, auditable after the fact, reproducible from a serialized string.
 
 Small library. But it's the part of the stack that has to be trustworthy before anything above it matters.
