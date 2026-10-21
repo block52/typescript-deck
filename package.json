@@ -1,6 +1,6 @@
 {
   "name": "@block52/deck",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "A TypeScript 52-card deck with a cryptographically secure, unbiased, verifiable shuffle. No dependencies; runs in Node, browsers and edge runtimes.",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",

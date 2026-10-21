@@ -120,6 +120,20 @@ SHA256 hash of the current deck order. Changes after each shuffle.
 
 SHA256 hash of the seed used for the last shuffle.
 
+### Names
+
+```typescript
+import { Deck, SUIT, rankName, suitName, cardName } from "@block52/deck";
+
+rankName(1);                       // "Ace"   (14 is accepted as a high ace too)
+rankName(6, true);                 // "Sixes"
+suitName(SUIT.SPADES);             // "Spades"
+suitName(SUIT.SPADES, false);      // "Spade"
+cardName(Deck.fromString("AS"));   // "Ace of Spades"
+```
+
+`rankName` throws a `RangeError` for a rank outside 1–14, `suitName` for an unknown suit. Hand evaluators build their wording from these ("Full House, Eights over Sevens", "Spade Flush").
+
 ### `Card`
 
 ```typescript
